@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+    <h1>To do list</h1>
+   <!-- <form action="index.php" method="post"> -->
+        <input type="text" name="" id="task">
+        <button id="add" onclick="addTask()">submit</button>
+        <div id="display"></div>
+    <!-- </form> -->
+    <script>
+        function addTask(){
+            const task= document.getElementById("task").value
+            fetch("/",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({task:task})
+                
+                
+
+            })
+            .then(console.log(task))
+            display()
+            document.getElementById("task").value=""
+        }
+        function display(){
+            let list=document.getElementById("display")
+            list.innerHTML=''
+            fetch("/view")
+            .then(res=>res.json())
+            .then(data=>{
+                
+                for(let i=0;i<data.length;i++){
+                    let li=document.createElement("li")
+                    JSON.stringify(data)
+                    console.log(data[i]._id);
+                    console.log(data[i].task)
+                    li.innerHTML=data[i].task
+                    let edit=document.createElement("button")
+                    edit.textContent='edit'
+                    edit.classList.add('edits')
+                    edit.onclick=function(){
+                        let temp=data[i].task
+                        newTask=prompt("enter new task:",temp)
+                        fetch(`/${data[i]._id}`,{
+                            method:"PUT",
+                            headers:{
+                                "Content-Type":"application/json"
+                                },
+                                body:JSON.stringify({task:newTask})
+                        })
+                        .then(console.log("updated"))
+                        display()
+                    }
+                    let deleteBtn=document.createElement("button")
+                    deleteBtn.textContent="delete"
+                    deleteBtn.classList.add('dels')
+                    deleteBtn.onclick=function(){
+                        fetch(`/${data[i]._id}`,{
+                            method:"DELETE",
+                            headers:{
+                                "Content-Type":"application/json"
+                                }
+                                })
+                                .then(console.log("deleted"))
+                                display()
+                                }
+                                li.append(edit,deleteBtn)
+                                list.append(li)
+                                
+                    
+                }
+            })
+        }
+        display()
+    </script>
+</body>
+</html>
